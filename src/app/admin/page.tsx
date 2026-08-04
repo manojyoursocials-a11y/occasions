@@ -21,7 +21,7 @@ export default async function AdminDashboard() {
       <p className="mt-1 text-sm text-ink/50">A snapshot of your pipeline, right now</p>
 
       <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="New Leads" value={leadCount} sub="awaiting response" />
+        <StatCard label="New Enquiries" value={leadCount} sub="awaiting response" />
         <StatCard label="Active Projects" value={projectCount} sub="booked events" />
         <StatCard label="Total Quoted" value={formatINR(totalQuoted)} />
         <StatCard label="Collected" value={formatINR(totalCollected)} sub="across all projects" />
@@ -30,7 +30,7 @@ export default async function AdminDashboard() {
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card className="p-0">
           <div className="flex items-center justify-between border-b border-black/5 px-5 py-4">
-            <p className="text-sm font-semibold text-ink">Recent Leads</p>
+            <p className="text-sm font-semibold text-ink">Recent Enquiries</p>
             <a href="/admin/leads" className="text-xs text-brand-700 hover:underline">View all</a>
           </div>
           <div className="divide-y divide-black/5">

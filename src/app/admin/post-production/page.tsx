@@ -1,16 +1,20 @@
 import { prisma } from "@/lib/prisma";
 import { Card, CardLabel } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
+import { Input, Select } from "@/components/ui/FormField";
+import { Button } from "@/components/ui/Button";
+import { DeliverableStatusSelect } from "@/components/admin/DeliverableStatusSelect";
+import { createDeliverable } from "@/lib/actions/deliverables";
 import { formatDate } from "@/lib/utils";
 
-const TONE = { not_started: "gray", in_progress: "amber", ready: "brand", delivered: "green" } as const;
-const LABEL = { not_started: "Not Started", in_progress: "In Progress", ready: "Ready", delivered: "Delivered" } as const;
-
 export default async function PostProductionPage() {
-  const deliverables = await prisma.deliverable.findMany({
-    include: { project: true, editor: true },
-    orderBy: { dueDate: "asc" },
-  });
+  const [deliverables, projects, editors] = await Promise.all([
+    prisma.deliverable.findMany({
+      include: { project: true, editor: true },
+      orderBy: { dueDate: "asc" },
+    }),
+    prisma.project.findMany({ orderBy: { title: "asc" } }),
+    prisma.teamMember.findMany({ where: { role: "editor", active: true }, orderBy: { fullName: "asc" } }),
+  ]);
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -30,11 +34,32 @@ export default async function PostProductionPage() {
               {d.dueDate ? ` · Due ${formatDate(d.dueDate.toISOString())}` : ""}
             </p>
             <div className="mt-3">
-              <Badge tone={TONE[d.status]}>{LABEL[d.status]}</Badge>
+              <DeliverableStatusSelect id={d.id} status={d.status} />
             </div>
           </Card>
         ))}
       </div>
+
+      <Card className="mt-6">
+        <p className="mb-3 text-sm font-semibold text-ink">Add Deliverable</p>
+        <form action={createDeliverable} className="flex flex-wrap items-center gap-2">
+          <Select name="projectId" required className="w-auto flex-1">
+            <option value="">Select project…</option>
+            {projects.map((p) => (
+              <option key={p.id} value={p.id}>{p.title}</option>
+            ))}
+          </Select>
+          <Input name="title" placeholder="e.g. Wedding Day Highlights" className="w-auto flex-1" required />
+          <Select name="editorId" className="w-auto">
+            <option value="">Unassigned editor</option>
+            {editors.map((e) => (
+              <option key={e.id} value={e.id}>{e.fullName}</option>
+            ))}
+          </Select>
+          <Input name="dueDate" type="date" className="w-auto" />
+          <Button type="submit" variant="secondary">Add</Button>
+        </form>
+      </Card>
     </div>
   );
 }

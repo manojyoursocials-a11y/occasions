@@ -4,23 +4,23 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  UsersRound,
-  Contact,
-  Wallet,
+  Search,
+  FolderOpen,
   Film,
+  UsersRound,
+  Wallet,
   Zap,
-  Users,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/leads", label: "Leads", icon: Contact },
-  { href: "/admin/clients", label: "Clients & Projects", icon: Users },
+  { href: "/admin/leads", label: "Enquiries", icon: Search },
+  { href: "/admin/clients", label: "Projects", icon: FolderOpen },
+  { href: "/admin/post-production", label: "Post Production", icon: Film },
   { href: "/admin/team", label: "Team", icon: UsersRound },
-  { href: "/admin/payments", label: "Payments", icon: Wallet },
-  { href: "/admin/post-production", label: "Post-Production", icon: Film },
+  { href: "/admin/payments", label: "Finances", icon: Wallet },
   { href: "/admin/automation", label: "Automation", icon: Zap },
 ] as const;
 
@@ -28,7 +28,7 @@ export function AdminSidebar({ adminName }: { adminName: string }) {
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-black/5 bg-white">
+    <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-black/5 bg-white">
       <div className="flex items-center gap-3 px-5 py-5">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-900 text-sm font-semibold text-white">
           A
@@ -41,7 +41,7 @@ export function AdminSidebar({ adminName }: { adminName: string }) {
 
       <nav className="flex-1 space-y-0.5 px-3 pb-4">
         <p className="px-2 pb-2 pt-1 text-[11px] font-medium uppercase tracking-wide text-ink/35">
-          Workspace
+          General
         </p>
         {NAV.map((item) => {
           const active = item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href);

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardLabel } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { formatDate } from "@/lib/utils";
+import { clientSignContract } from "@/lib/actions/portal-contract";
 
 export default async function ContractPage() {
   const session = await getSession();
@@ -39,7 +40,9 @@ export default async function ContractPage() {
         )}
 
         {!signed && contract?.fileUrl && (
-          <Button className="mt-6">Review &amp; Sign</Button>
+          <form action={clientSignContract.bind(null, project!.id)}>
+            <Button type="submit" className="mt-6">Review &amp; Sign</Button>
+          </form>
         )}
       </Card>
     </div>

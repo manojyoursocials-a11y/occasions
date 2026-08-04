@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 import { formatINR, formatDate } from "@/lib/utils";
 
 export default async function ClientsPage() {
@@ -11,8 +13,15 @@ export default async function ClientsPage() {
 
   return (
     <div className="mx-auto max-w-5xl">
-      <h1 className="text-2xl font-semibold text-ink">Clients & Projects</h1>
-      <p className="mt-1 text-sm text-ink/50">Every booked couple, one place</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-ink">Projects</h1>
+          <p className="mt-1 text-sm text-ink/50">Every booked couple, one place</p>
+        </div>
+        <Link href="/admin/clients/new">
+          <Button>+ New Project</Button>
+        </Link>
+      </div>
 
       <Card className="mt-6 p-0">
         <table className="w-full text-sm">
@@ -30,8 +39,10 @@ export default async function ClientsPage() {
               <tr><td colSpan={5} className="px-5 py-6 text-center text-ink/50">No projects yet.</td></tr>
             )}
             {projects.map((p) => (
-              <tr key={p.id}>
-                <td className="px-5 py-3 font-medium text-ink">{p.title}</td>
+              <tr key={p.id} className="cursor-pointer hover:bg-black/[0.02]">
+                <td className="px-5 py-3 font-medium text-ink">
+                  <Link href={`/admin/clients/${p.id}`} className="hover:underline">{p.title}</Link>
+                </td>
                 <td className="px-5 py-3 text-ink/60">{p.client?.fullName || "Unassigned"}</td>
                 <td className="px-5 py-3 text-ink/60">{formatDate(p.eventDate.toISOString())}</td>
                 <td className="px-5 py-3 text-ink/60">{formatINR(Number(p.totalQuote))}</td>
