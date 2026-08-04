@@ -31,10 +31,10 @@ export function AdminSidebar({ adminName }: { adminName: string }) {
     <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-black/5 bg-white">
       <div className="flex items-center gap-3 px-5 py-5">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-900 text-sm font-semibold text-white">
-          A
+          O
         </div>
         <div>
-          <p className="text-sm font-semibold leading-tight text-ink">Aperture Weddings</p>
+          <p className="text-sm font-semibold leading-tight text-ink">The Occasions Event Planners</p>
           <p className="text-[11px] uppercase tracking-wide text-ink/40">Studio Admin</p>
         </div>
       </div>

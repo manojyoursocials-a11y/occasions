@@ -1,6 +1,6 @@
-// Prisma schema — Supabase is used purely as a hosted Postgres database.
+// Prisma schema — the database is a hosted Postgres instance (Prisma Postgres).
 // Auth, sessions, and access control are handled in the app via NextAuth,
-// not Supabase Auth.
+// not any database-vendor auth product.
 
 generator client {
   provider = "prisma-client-js"
@@ -60,7 +60,7 @@ model User {
   passwordHash String
   phone        String?
   avatarUrl    String?
-  companyName  String   @default("Aperture Weddings")
+  companyName  String   @default("The Occasions Event Planners")
   createdAt    DateTime @default(now())
 
   projects       Project[]

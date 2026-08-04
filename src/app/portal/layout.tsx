@@ -19,7 +19,7 @@ export default async function PortalLayout({ children }: { children: React.React
   return (
     <div className="flex">
       <PortalSidebar
-        companyName={user?.companyName || "Aperture Weddings"}
+        companyName={user?.companyName || "The Occasions Event Planners"}
         projectTitle={project?.title || "No project yet"}
         eventLabel={project?.eventType || "Event"}
         eventDate={project ? formatDate(project.eventDate.toISOString()) : "—"}

@@ -3,8 +3,8 @@ import "./globals.css";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "Aperture Weddings — Studio Portal",
-  description: "Admin CRM and client portal for Aperture Weddings.",
+  title: "The Occasions Event Planners — Studio Portal",
+  description: "Admin CRM and client portal for The Occasions Event Planners.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

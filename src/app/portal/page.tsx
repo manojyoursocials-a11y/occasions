@@ -34,7 +34,7 @@ export default async function PortalDashboard() {
         Welcome, {user?.fullName?.split(" ")[0] || "there"}
       </h1>
       <p className="mt-1 text-sm text-ink/50">
-        {user?.companyName || "Aperture Weddings"}
+        {user?.companyName || "The Occasions Event Planners"}
         {project ? ` · ${project.title}` : ""}
       </p>
 

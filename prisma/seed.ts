@@ -8,14 +8,14 @@ async function main() {
   const clientPasswordHash = await bcrypt.hash("client1234", 10);
 
   const admin = await prisma.user.upsert({
-    where: { email: "admin@aperture.studio" },
+    where: { email: "admin@theoccasions.studio" },
     update: {},
     create: {
-      email: "admin@aperture.studio",
+      email: "admin@theoccasions.studio",
       passwordHash: adminPasswordHash,
       fullName: "Studio Admin",
       role: "admin",
-      companyName: "Aperture Weddings",
+      companyName: "The Occasions Event Planners",
     },
   });
 
@@ -27,7 +27,7 @@ async function main() {
       passwordHash: clientPasswordHash,
       fullName: "Ananya Sharma",
       role: "client",
-      companyName: "Aperture Weddings",
+      companyName: "The Occasions Event Planners",
     },
   });
 
@@ -73,7 +73,7 @@ async function main() {
   });
 
   console.log("Seed complete.");
-  console.log("Admin login: admin@aperture.studio / admin1234");
+  console.log("Admin login: admin@theoccasions.studio / admin1234");
   console.log("Client login: ananya@example.com / client1234");
 }
 

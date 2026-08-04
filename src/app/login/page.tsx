@@ -43,9 +43,9 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center text-center">
           <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-900 text-sm font-semibold text-white">
-            A
+            O
           </div>
-          <h1 className="text-xl font-semibold text-ink">Aperture Weddings</h1>
+          <h1 className="text-xl font-semibold text-ink">The Occasions Event Planners</h1>
           <p className="mt-1 text-sm text-ink/50">Sign in to your studio or client portal</p>
         </div>
 
