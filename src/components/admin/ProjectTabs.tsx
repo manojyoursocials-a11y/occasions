@@ -8,11 +8,12 @@ import { Button } from "@/components/ui/Button";
 import { Input, Select } from "@/components/ui/FormField";
 import { MarkPaidButton } from "@/components/admin/MarkPaidButton";
 import { DeleteScheduleItemButton } from "@/components/admin/DeleteScheduleItemButton";
+import { CopyButton } from "@/components/admin/CopyButton";
 import { formatINR, formatDate } from "@/lib/utils";
 import { assignTeamMember } from "@/lib/actions/team";
 import { createInstallment } from "@/lib/actions/payments";
 import { createScheduleItem } from "@/lib/actions/schedule";
-import { Clock, MapPin } from "lucide-react";
+import { Clock, MapPin, Link2, RefreshCcw } from "lucide-react";
 
 const TABS = ["Overview", "Schedule", "Payments", "Team", "Deliverables", "Contract"] as const;
 type Tab = (typeof TABS)[number];
@@ -41,16 +42,23 @@ export interface ProjectTabsData {
   }[];
   contract: { fileUrl: string | null; sentAtISO: string | null; signedAtISO: string | null } | null;
   teamMembers: { id: string; fullName: string; role: string }[];
+  shareToken: string | null;
+  sharePin: string | null;
+  shareBaseUrl: string;
 }
 
 export function ProjectTabs({
   project,
   sendContractAction,
   markSignedAction,
+  ensureShareLinkAction,
+  regenerateSharePinAction,
 }: {
   project: ProjectTabsData;
   sendContractAction: (formData: FormData) => Promise<void>;
   markSignedAction: () => Promise<void>;
+  ensureShareLinkAction: () => Promise<void>;
+  regenerateSharePinAction: () => Promise<void>;
 }) {
   const [tab, setTab] = useState<Tab>("Overview");
   const signed = project.contractStatus === "signed";
@@ -104,10 +112,44 @@ export function ProjectTabs({
               </div>
             </div>
             <p className="mt-4 text-xs text-ink/40">
-              Your client accesses this project by logging in at <code>/portal</code> with the
-              email above — there's no separate share link, since access is account-based rather
-              than a public token link.
+              Your client can also log in directly at <code>/portal</code> with the email above.
             </p>
+          </Card>
+        )}
+
+        {tab === "Overview" && (
+          <Card className="mt-4">
+            <CardLabel>Share With Client</CardLabel>
+            {!project.shareToken ? (
+              <>
+                <p className="mb-3 text-sm text-ink/50">
+                  Generate a PIN-protected link you can send to your client — no account or login
+                  required on their end.
+                </p>
+                <form action={ensureShareLinkAction}>
+                  <Button type="submit" variant="secondary">
+                    <Link2 className="h-4 w-4" /> Generate Link
+                  </Button>
+                </form>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <Input readOnly value={`${project.shareBaseUrl}/client/${project.shareToken}`} className="flex-1 bg-surface" />
+                  <CopyButton text={`${project.shareBaseUrl}/client/${project.shareToken}`} />
+                </div>
+                <div className="mt-3 flex items-center gap-3">
+                  <p className="text-sm text-ink/60">
+                    PIN: <span className="font-mono text-base font-semibold text-ink">{project.sharePin}</span>
+                  </p>
+                  <form action={regenerateSharePinAction}>
+                    <Button type="submit" variant="ghost" className="text-xs">
+                      <RefreshCcw className="h-3 w-3" /> Regenerate PIN
+                    </Button>
+                  </form>
+                </div>
+              </>
+            )}
           </Card>
         )}
 

@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { Card, CardLabel } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { formatINR, formatDate } from "@/lib/utils";
 import { markContractSigned, sendContract } from "@/lib/actions/projects";
+import { ensureShareLink, regenerateSharePin } from "@/lib/actions/client-share";
 import { ProjectTabs, type ProjectTabsData } from "@/components/admin/ProjectTabs";
 import { ChevronLeft } from "lucide-react";
 
@@ -33,6 +35,10 @@ export default async function ProjectDetailPage({
     where: { active: true },
     orderBy: { fullName: "asc" },
   });
+
+  const hdrs = await headers();
+  const host = hdrs.get("host") || "localhost:3000";
+  const protocol = host.startsWith("localhost") ? "http" : "https";
 
   // Convert Decimal/Date fields to plain, client-serializable values.
   const data: ProjectTabsData = {
@@ -80,10 +86,15 @@ export default async function ProjectDetailPage({
         }
       : null,
     teamMembers: teamMembers.map((m) => ({ id: m.id, fullName: m.fullName, role: m.role })),
+    shareToken: project.shareToken,
+    sharePin: project.sharePin,
+    shareBaseUrl: `${protocol}://${host}`,
   };
 
   const sendContractWithId = sendContract.bind(null, project.id);
   const markSignedWithId = markContractSigned.bind(null, project.id);
+  const ensureShareLinkWithId = ensureShareLink.bind(null, project.id);
+  const regenerateSharePinWithId = regenerateSharePin.bind(null, project.id);
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -118,7 +129,13 @@ export default async function ProjectDetailPage({
         </Card>
       </div>
 
-      <ProjectTabs project={data} sendContractAction={sendContractWithId} markSignedAction={markSignedWithId} />
+      <ProjectTabs
+        project={data}
+        sendContractAction={sendContractWithId}
+        markSignedAction={markSignedWithId}
+        ensureShareLinkAction={ensureShareLinkWithId}
+        regenerateSharePinAction={regenerateSharePinWithId}
+      />
     </div>
   );
 }

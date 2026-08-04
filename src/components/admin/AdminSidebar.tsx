@@ -10,6 +10,7 @@ import {
   UsersRound,
   Wallet,
   Zap,
+  Sparkles,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
@@ -28,19 +29,19 @@ export function AdminSidebar({ adminName }: { adminName: string }) {
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-black/5 bg-white">
+    <aside className="flex h-screen w-60 shrink-0 flex-col bg-[#0c0b16] text-white/80">
       <div className="flex items-center gap-3 px-5 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-900 text-sm font-semibold text-white">
-          O
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-semibold text-white">
+          <Sparkles className="h-4 w-4" />
         </div>
         <div>
-          <p className="text-sm font-semibold leading-tight text-ink">The Occasions Event Planners</p>
-          <p className="text-[11px] uppercase tracking-wide text-ink/40">Studio Admin</p>
+          <p className="text-sm font-semibold leading-tight text-white">The Occasions</p>
+          <p className="text-[10px] uppercase tracking-widest text-white/40">Studio OS</p>
         </div>
       </div>
 
       <nav className="flex-1 space-y-0.5 px-3 pb-4">
-        <p className="px-2 pb-2 pt-1 text-[11px] font-medium uppercase tracking-wide text-ink/35">
+        <p className="px-2 pb-2 pt-1 text-[11px] font-medium uppercase tracking-wide text-white/30">
           General
         </p>
         {NAV.map((item) => {
@@ -52,7 +53,9 @@ export function AdminSidebar({ adminName }: { adminName: string }) {
               href={item.href}
               className={cn(
                 "focus-ring flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm transition",
-                active ? "bg-brand-50 font-medium text-brand-800" : "text-ink/70 hover:bg-black/[0.03]"
+                active
+                  ? "bg-brand-600/25 font-medium text-white"
+                  : "text-white/55 hover:bg-white/5 hover:text-white/80"
               )}
             >
               <Icon className="h-4 w-4" />
@@ -62,11 +65,11 @@ export function AdminSidebar({ adminName }: { adminName: string }) {
         })}
       </nav>
 
-      <div className="border-t border-black/5 px-4 py-4">
-        <p className="text-xs font-medium text-ink">{adminName}</p>
+      <div className="border-t border-white/10 px-4 py-4">
+        <p className="text-xs font-medium text-white/80">{adminName}</p>
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}
-          className="text-xs text-ink/40 hover:text-ink/60"
+          className="text-xs text-white/35 hover:text-white/60"
         >
           Sign out
         </button>

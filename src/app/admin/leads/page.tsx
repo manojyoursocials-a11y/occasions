@@ -2,12 +2,9 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { LeadStatusSelect } from "@/components/admin/LeadStatusSelect";
-import { formatDate } from "@/lib/utils";
+import { EnquiryRow } from "@/components/admin/EnquiryRow";
 import { Search } from "lucide-react";
 
-// Underlying enum stays new/contacted/quoted/won/lost (stable, low-risk),
-// but we display it with labels that match the studio's actual workflow.
 const STATUS_LABELS: Record<string, string> = {
   new: "New",
   contacted: "Following Up",
@@ -46,10 +43,23 @@ export default async function LeadsPage({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-ink">Enquiries</h1>
-          <p className="mt-1 text-sm text-ink/50">Turn enquiries into bookings, fast</p>
+          <p className="mt-1 text-sm text-ink/50">Landing page · leads · analytics · integrations</p>
         </div>
         <Link href="/admin/leads/new">
           <Button>+ New Enquiry</Button>
+        </Link>
+      </div>
+
+      {/* Sub-tabs */}
+      <div className="mt-4 flex gap-1 border-b border-black/5">
+        <div className="border-b-2 border-brand-700 px-3 py-2 text-sm font-medium text-brand-800">
+          Enquiries
+        </div>
+        <Link
+          href="/admin/leads/landing-page"
+          className="px-3 py-2 text-sm text-ink/50 hover:text-ink/70"
+        >
+          Landing Page
         </Link>
       </div>
 
@@ -111,27 +121,23 @@ export default async function LeadsPage({
               <tr><td colSpan={8} className="px-5 py-6 text-center text-ink/50">No enquiries match.</td></tr>
             )}
             {leads.map((lead) => (
-              <tr key={lead.id}>
-                <td className="px-5 py-3 text-ink/60">{formatDate(lead.createdAt.toISOString())}</td>
-                <td className="px-5 py-3 font-medium text-ink">{lead.fullName}</td>
-                <td className="px-5 py-3 text-ink/60">{lead.phone || lead.email || "—"}</td>
-                <td className="px-5 py-3 text-ink/60">
-                  {lead.eventType || "—"}{lead.eventDate ? ` · ${formatDate(lead.eventDate.toISOString())}` : ""}
-                </td>
-                <td className="px-5 py-3 text-ink/60">{lead.budgetRange || (lead.quoteAmount ? `₹${lead.quoteAmount}` : "—")}</td>
-                <td className="px-5 py-3 text-ink/60">{lead.source}</td>
-                <td className="px-5 py-3"><LeadStatusSelect leadId={lead.id} status={lead.status} /></td>
-                <td className="px-5 py-3">
-                  {(lead.status === "quoted" || lead.status === "won") && (
-                    <Link
-                      href={`/admin/clients/new?leadId=${lead.id}&fullName=${encodeURIComponent(lead.fullName)}&email=${encodeURIComponent(lead.email || "")}&eventType=${encodeURIComponent(lead.eventType || "Wedding")}&eventDate=${lead.eventDate ? lead.eventDate.toISOString().slice(0, 10) : ""}`}
-                      className="text-xs font-medium text-brand-700 hover:underline"
-                    >
-                      Convert to Project →
-                    </Link>
-                  )}
-                </td>
-              </tr>
+              <EnquiryRow
+                key={lead.id}
+                lead={{
+                  id: lead.id,
+                  fullName: lead.fullName,
+                  email: lead.email,
+                  phone: lead.phone,
+                  eventType: lead.eventType,
+                  eventDateISO: lead.eventDate ? lead.eventDate.toISOString() : null,
+                  budgetRange: lead.budgetRange,
+                  quoteAmount: lead.quoteAmount ? Number(lead.quoteAmount) : null,
+                  source: lead.source,
+                  status: lead.status,
+                  notes: lead.notes,
+                  createdAtISO: lead.createdAt.toISOString(),
+                }}
+              />
             ))}
           </tbody>
         </table>

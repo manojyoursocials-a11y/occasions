@@ -107,6 +107,8 @@ model Project {
   galleryItemsTotal  Int            @default(4)
   galleryItemsReady  Int            @default(0)
   coverImageUrl      String?
+  shareToken         String?        @unique
+  sharePin           String?
   createdAt          DateTime       @default(now())
 
   installments PaymentInstallment[]
@@ -241,4 +243,15 @@ model AutomationEvent {
   sentAt    DateTime @default(now())
 
   @@map("automation_events")
+}
+
+// Singleton row (id is always 1) holding the public enquiry landing page copy.
+model LandingPageSettings {
+  id          Int      @id @default(1)
+  heading     String   @default("Let's capture your story")
+  subheading  String   @default("Fill in your details and we'll get back to you within 24 hours.")
+  coverImageUrl String?
+  updatedAt   DateTime @updatedAt
+
+  @@map("landing_page_settings")
 }
