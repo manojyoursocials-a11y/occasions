@@ -13,7 +13,7 @@ import { formatINR, formatDate } from "@/lib/utils";
 import { assignTeamMember } from "@/lib/actions/team";
 import { createInstallment } from "@/lib/actions/payments";
 import { createScheduleItem } from "@/lib/actions/schedule";
-import { Clock, MapPin, Link2, RefreshCcw } from "lucide-react";
+import { Clock, MapPin, Link2, RefreshCcw, CheckCircle2, Pencil, ChevronRight } from "lucide-react";
 
 const TABS = ["Overview", "Schedule", "Payments", "Team", "Deliverables", "Contract"] as const;
 type Tab = (typeof TABS)[number];
@@ -53,15 +53,32 @@ export function ProjectTabs({
   markSignedAction,
   ensureShareLinkAction,
   regenerateSharePinAction,
+  updateOverviewAction,
 }: {
   project: ProjectTabsData;
   sendContractAction: (formData: FormData) => Promise<void>;
   markSignedAction: () => Promise<void>;
   ensureShareLinkAction: () => Promise<void>;
   regenerateSharePinAction: () => Promise<void>;
+  updateOverviewAction: (formData: FormData) => Promise<void>;
 }) {
   const [tab, setTab] = useState<Tab>("Overview");
+  const [editingOverview, setEditingOverview] = useState(false);
   const signed = project.contractStatus === "signed";
+
+  const isComplete: Record<Tab, boolean> = {
+    Overview: Boolean(project.title && project.eventDateISO),
+    Schedule: project.schedule.length > 0,
+    Payments: project.installments.length > 0,
+    Team: project.assignments.length > 0,
+    Deliverables: project.deliverables.length > 0,
+    Contract: signed,
+  };
+
+  function goToNextTab() {
+    const i = TABS.indexOf(tab);
+    if (i < TABS.length - 1) setTab(TABS[i + 1]);
+  }
 
   return (
     <div>
@@ -70,13 +87,14 @@ export function ProjectTabs({
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`focus-ring rounded-t-lg px-3 py-2 text-sm font-medium transition ${
+            className={`focus-ring flex items-center gap-1.5 rounded-t-lg px-3 py-2 text-sm font-medium transition ${
               tab === t
                 ? "border-b-2 border-brand-700 text-brand-800"
                 : "text-ink/50 hover:text-ink/70"
             }`}
           >
             {t}
+            {isComplete[t] && <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />}
           </button>
         ))}
       </div>
@@ -84,33 +102,78 @@ export function ProjectTabs({
       <div className="mt-4">
         {tab === "Overview" && (
           <Card>
-            <CardLabel>Project Overview</CardLabel>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-wide text-ink/40">Project Name</p>
-                <p className="text-sm font-medium text-ink">{project.title}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-ink/40">Project Type</p>
-                <p className="text-sm font-medium text-ink">{project.eventType}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-ink/40">Client Name</p>
-                <p className="text-sm font-medium text-ink">{project.client?.fullName || "Unassigned"}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-ink/40">Client Login Email</p>
-                <p className="text-sm font-medium text-ink">{project.client?.email || "—"}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-ink/40">Venue</p>
-                <p className="text-sm font-medium text-ink">{project.venue || "—"}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-ink/40">Event Date</p>
-                <p className="text-sm font-medium text-ink">{formatDate(project.eventDateISO)}</p>
-              </div>
+            <div className="flex items-center justify-between">
+              <CardLabel>Project Overview</CardLabel>
+              <Button variant="ghost" className="text-xs" onClick={() => setEditingOverview((v) => !v)}>
+                <Pencil className="h-3.5 w-3.5" /> {editingOverview ? "Cancel" : "Edit"}
+              </Button>
             </div>
+
+            {editingOverview ? (
+              <form
+                action={async (formData) => {
+                  await updateOverviewAction(formData);
+                  setEditingOverview(false);
+                }}
+              >
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="mb-1 block text-xs text-ink/50">Project Name</label>
+                    <Input name="title" defaultValue={project.title} required />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs text-ink/50">Project Type</label>
+                    <Select name="eventType" defaultValue={project.eventType}>
+                      <option>Wedding</option>
+                      <option>Engagement</option>
+                      <option>Pre-Wedding Shoot</option>
+                      <option>Reception</option>
+                      <option>Other</option>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs text-ink/50">Venue</label>
+                    <Input name="venue" defaultValue={project.venue || ""} />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs text-ink/50">Event Date</label>
+                    <Input name="eventDate" type="date" defaultValue={project.eventDateISO.slice(0, 10)} required />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs text-ink/50">Total Quote (₹)</label>
+                    <Input name="totalQuote" type="number" defaultValue={project.totalQuote} />
+                  </div>
+                </div>
+                <Button type="submit" className="mt-4">Save Changes</Button>
+              </form>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-ink/40">Project Name</p>
+                  <p className="text-sm font-medium text-ink">{project.title}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-ink/40">Project Type</p>
+                  <p className="text-sm font-medium text-ink">{project.eventType}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-ink/40">Client Name</p>
+                  <p className="text-sm font-medium text-ink">{project.client?.fullName || "Unassigned"}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-ink/40">Client Login Email</p>
+                  <p className="text-sm font-medium text-ink">{project.client?.email || "—"}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-ink/40">Venue</p>
+                  <p className="text-sm font-medium text-ink">{project.venue || "—"}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-ink/40">Event Date</p>
+                  <p className="text-sm font-medium text-ink">{formatDate(project.eventDateISO)}</p>
+                </div>
+              </div>
+            )}
             <p className="mt-4 text-xs text-ink/40">
               Your client can also log in directly at <code>/portal</code> with the email above.
             </p>
@@ -153,6 +216,14 @@ export function ProjectTabs({
           </Card>
         )}
 
+        {tab === "Overview" && (
+          <div className="mt-4 flex justify-end">
+            <Button variant="secondary" onClick={goToNextTab}>
+              Next <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+
         {tab === "Schedule" && (
           <Card>
             <CardLabel>Event Schedule</CardLabel>
@@ -185,6 +256,14 @@ export function ProjectTabs({
               <Button type="submit" variant="secondary">Add</Button>
             </form>
           </Card>
+        )}
+
+        {tab === "Schedule" && (
+          <div className="mt-4 flex justify-end">
+            <Button variant="secondary" onClick={goToNextTab}>
+              Next <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         )}
 
         {tab === "Payments" && (
@@ -222,6 +301,14 @@ export function ProjectTabs({
           </Card>
         )}
 
+        {tab === "Payments" && (
+          <div className="mt-4 flex justify-end">
+            <Button variant="secondary" onClick={goToNextTab}>
+              Next <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+
         {tab === "Team" && (
           <Card>
             <CardLabel>Team Assigned</CardLabel>
@@ -251,6 +338,14 @@ export function ProjectTabs({
           </Card>
         )}
 
+        {tab === "Team" && (
+          <div className="mt-4 flex justify-end">
+            <Button variant="secondary" onClick={goToNextTab}>
+              Next <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+
         {tab === "Deliverables" && (
           <Card>
             <CardLabel>Deliverables</CardLabel>
@@ -270,6 +365,14 @@ export function ProjectTabs({
               Add or update deliverables from the <Link href="/admin/post-production" className="underline">Post Production</Link> page.
             </p>
           </Card>
+        )}
+
+        {tab === "Deliverables" && (
+          <div className="mt-4 flex justify-end">
+            <Button variant="secondary" onClick={goToNextTab}>
+              Next <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         )}
 
         {tab === "Contract" && (

@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/Button";
 import { EnquiryRow } from "@/components/admin/EnquiryRow";
 import { Search } from "lucide-react";
 
-const STATUS_LABELS: Record<string, string> = {
-  new: "New",
-  contacted: "Following Up",
-  quoted: "Proposal Sent",
-  won: "Booked",
-  lost: "Lost",
+// Underlying enum stays new/contacted/quoted/won/lost (stable, low-risk),
+// but we display it with labels and colors that match the studio's workflow.
+const STATUS_META: Record<string, { label: string; active: string }> = {
+  new: { label: "New", active: "border-brand-600 bg-brand-50 text-brand-700" },
+  contacted: { label: "Following Up", active: "border-blue-600 bg-blue-50 text-blue-700" },
+  quoted: { label: "Proposal Sent", active: "border-amber-600 bg-amber-50 text-amber-700" },
+  won: { label: "Booked", active: "border-green-600 bg-green-50 text-green-700" },
+  lost: { label: "Lost", active: "border-red-600 bg-red-50 text-red-700" },
 };
 
 export default async function LeadsPage({
@@ -64,26 +66,27 @@ export default async function LeadsPage({
       </div>
 
       {/* Status pills */}
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-4 flex flex-wrap items-center gap-2">
         <Link
           href="/admin/leads"
-          className={`rounded-full border px-3 py-1 text-xs font-medium ${
-            !statusFilter ? "border-brand-600 bg-brand-50 text-brand-700" : "border-black/10 text-ink/60"
+          className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+            !statusFilter ? "border-ink/70 bg-ink/5 text-ink" : "border-black/10 text-ink/50 hover:border-black/20"
           }`}
         >
           All: {allLeads.length}
         </Link>
-        {Object.entries(STATUS_LABELS).map(([value, label]) => (
+        {Object.entries(STATUS_META).map(([value, meta]) => (
           <Link
             key={value}
             href={`/admin/leads?status=${value}`}
-            className={`rounded-full border px-3 py-1 text-xs font-medium ${
-              statusFilter === value ? "border-brand-600 bg-brand-50 text-brand-700" : "border-black/10 text-ink/60"
+            className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+              statusFilter === value ? meta.active : "border-black/10 text-ink/50 hover:border-black/20"
             }`}
           >
-            {label}: {counts[value] || 0}
+            {meta.label}: {counts[value] || 0}
           </Link>
         ))}
+        <span className="ml-auto text-xs text-ink/35">Showing {leads.length} of {allLeads.length}</span>
       </div>
 
       {/* Search */}

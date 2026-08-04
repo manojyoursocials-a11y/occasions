@@ -71,6 +71,28 @@ export async function createProject(formData: FormData) {
   redirect(`/admin/clients/${project.id}`);
 }
 
+export async function updateProjectOverview(projectId: string, formData: FormData) {
+  await requireAdmin();
+
+  const title = String(formData.get("title") || "").trim();
+  const eventDateRaw = String(formData.get("eventDate") || "");
+  if (!title || !eventDateRaw) throw new Error("Title and event date are required");
+
+  await prisma.project.update({
+    where: { id: projectId },
+    data: {
+      title,
+      eventType: String(formData.get("eventType") || "Wedding"),
+      eventDate: new Date(eventDateRaw),
+      venue: String(formData.get("venue") || "") || null,
+      totalQuote: Number(formData.get("totalQuote") || 0),
+    },
+  });
+
+  revalidatePath("/admin/clients");
+  revalidatePath(`/admin/clients/${projectId}`);
+}
+
 export async function markContractSigned(projectId: string) {
   await requireAdmin();
   await prisma.project.update({

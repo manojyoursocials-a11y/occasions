@@ -10,7 +10,6 @@ import {
   UsersRound,
   Wallet,
   Zap,
-  Sparkles,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
@@ -29,19 +28,19 @@ export function AdminSidebar({ adminName }: { adminName: string }) {
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-screen w-60 shrink-0 flex-col bg-[#0c0b16] text-white/80">
+    <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-white/5 bg-[#100c1d]">
       <div className="flex items-center gap-3 px-5 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-semibold text-white">
-          <Sparkles className="h-4 w-4" />
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-800 text-sm font-semibold text-white shadow-[0_0_0_1px_rgba(255,255,255,0.06)]">
+          O
         </div>
         <div>
           <p className="text-sm font-semibold leading-tight text-white">The Occasions</p>
-          <p className="text-[10px] uppercase tracking-widest text-white/40">Studio OS</p>
+          <p className="text-[11px] uppercase tracking-wide text-white/35">Studio OS</p>
         </div>
       </div>
 
       <nav className="flex-1 space-y-0.5 px-3 pb-4">
-        <p className="px-2 pb-2 pt-1 text-[11px] font-medium uppercase tracking-wide text-white/30">
+        <p className="px-2 pb-2 pt-1 text-[11px] font-medium uppercase tracking-wide text-white/25">
           General
         </p>
         {NAV.map((item) => {
@@ -54,18 +53,18 @@ export function AdminSidebar({ adminName }: { adminName: string }) {
               className={cn(
                 "focus-ring flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm transition",
                 active
-                  ? "bg-brand-600/25 font-medium text-white"
+                  ? "bg-white/10 font-medium text-white"
                   : "text-white/55 hover:bg-white/5 hover:text-white/80"
               )}
             >
-              <Icon className="h-4 w-4" />
+              <Icon className={cn("h-4 w-4", active ? "text-brand-300" : "text-white/40")} />
               {item.label}
             </Link>
           );
         })}
       </nav>
 
-      <div className="border-t border-white/10 px-4 py-4">
+      <div className="border-t border-white/5 px-4 py-4">
         <p className="text-xs font-medium text-white/80">{adminName}</p>
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}

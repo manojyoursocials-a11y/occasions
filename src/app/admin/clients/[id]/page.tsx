@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardLabel } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { formatINR, formatDate } from "@/lib/utils";
-import { markContractSigned, sendContract } from "@/lib/actions/projects";
+import { markContractSigned, sendContract, updateProjectOverview } from "@/lib/actions/projects";
 import { ensureShareLink, regenerateSharePin } from "@/lib/actions/client-share";
 import { ProjectTabs, type ProjectTabsData } from "@/components/admin/ProjectTabs";
 import { ChevronLeft } from "lucide-react";
@@ -95,6 +95,7 @@ export default async function ProjectDetailPage({
   const markSignedWithId = markContractSigned.bind(null, project.id);
   const ensureShareLinkWithId = ensureShareLink.bind(null, project.id);
   const regenerateSharePinWithId = regenerateSharePin.bind(null, project.id);
+  const updateOverviewWithId = updateProjectOverview.bind(null, project.id);
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -135,6 +136,7 @@ export default async function ProjectDetailPage({
         markSignedAction={markSignedWithId}
         ensureShareLinkAction={ensureShareLinkWithId}
         regenerateSharePinAction={regenerateSharePinWithId}
+        updateOverviewAction={updateOverviewWithId}
       />
     </div>
   );
