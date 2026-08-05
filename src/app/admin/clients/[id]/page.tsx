@@ -5,8 +5,9 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardLabel } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { formatINR, formatDate } from "@/lib/utils";
-import { markContractSigned, sendContract, updateProjectOverview } from "@/lib/actions/projects";
+import { markContractSigned, sendContract, updateProjectOverview, deleteProject } from "@/lib/actions/projects";
 import { ensureShareLink, regenerateSharePin } from "@/lib/actions/client-share";
+import { getSession } from "@/lib/get-session";
 import { ProjectTabs, type ProjectTabsData } from "@/components/admin/ProjectTabs";
 import { ChevronLeft } from "lucide-react";
 
@@ -96,6 +97,13 @@ export default async function ProjectDetailPage({
   const ensureShareLinkWithId = ensureShareLink.bind(null, project.id);
   const regenerateSharePinWithId = regenerateSharePin.bind(null, project.id);
   const updateOverviewWithId = updateProjectOverview.bind(null, project.id);
+  const deleteProjectWithId = deleteProject.bind(null, project.id);
+
+  const session = await getSession();
+  const currentUser = session?.user
+    ? await prisma.user.findUnique({ where: { id: session.user.id } })
+    : null;
+  const canDelete = Boolean(currentUser?.canDelete || currentUser?.isOwner);
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -137,6 +145,8 @@ export default async function ProjectDetailPage({
         ensureShareLinkAction={ensureShareLinkWithId}
         regenerateSharePinAction={regenerateSharePinWithId}
         updateOverviewAction={updateOverviewWithId}
+        deleteProjectAction={deleteProjectWithId}
+        canDelete={canDelete}
       />
     </div>
   );

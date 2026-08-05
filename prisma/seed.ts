@@ -9,13 +9,18 @@ async function main() {
 
   const admin = await prisma.user.upsert({
     where: { email: "admin@theoccasions.studio" },
-    update: {},
+    // If this account already exists from before permissions existed,
+    // re-running the seed promotes it to owner rather than leaving it
+    // locked out at the new default (isOwner: false, canDelete: false).
+    update: { isOwner: true, canDelete: true },
     create: {
       email: "admin@theoccasions.studio",
       passwordHash: adminPasswordHash,
       fullName: "Studio Admin",
       role: "admin",
       companyName: "The Occasions Event Planners",
+      isOwner: true,
+      canDelete: true,
     },
   });
 
@@ -84,6 +89,9 @@ async function main() {
     const passwordHash = await bcrypt.hash(acct.password, 10);
     await prisma.user.upsert({
       where: { email: acct.email },
+      // Leave update empty — if the owner has already customized this
+      // person's canDelete permission via the Admin Logins page, re-running
+      // the seed shouldn't silently reset it.
       update: {},
       create: {
         email: acct.email,
@@ -91,14 +99,16 @@ async function main() {
         fullName: acct.name,
         role: "admin",
         companyName: "The Occasions Event Planners",
+        isOwner: false,
+        canDelete: false,
       },
     });
   }
 
   console.log("Seed complete.");
-  console.log("Admin login: admin@theoccasions.studio / admin1234");
+  console.log("Admin login (owner): admin@theoccasions.studio / admin1234");
   console.log("Client login: ananya@example.com / client1234");
-  console.log("Team logins:");
+  console.log("Team logins (no delete rights by default — grant via Admin Logins page):");
   for (const acct of teamAccounts) {
     console.log(`  ${acct.email} / ${acct.password}`);
   }

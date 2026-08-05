@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
 import { randomBytes } from "crypto";
+import { requireCanDelete } from "@/lib/permissions";
 
 async function requireAdmin() {
   const session = await getSession();
@@ -123,4 +124,14 @@ export async function sendContract(projectId: string, formData: FormData) {
   });
   revalidatePath("/admin/clients");
   revalidatePath(`/admin/clients/${projectId}`);
+}
+
+export async function deleteProject(projectId: string) {
+  await requireCanDelete();
+  // Child records (installments, assignments, schedule, moodboard,
+  // deliverables, documents, contract, automation events) all cascade via
+  // onDelete: Cascade in the schema — this is the only call needed.
+  await prisma.project.delete({ where: { id: projectId } });
+  revalidatePath("/admin/clients");
+  redirect("/admin/clients");
 }

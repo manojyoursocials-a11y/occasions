@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/get-session";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { requireCanDelete } from "@/lib/permissions";
 
 async function requireAdmin() {
   const session = await getSession();
@@ -54,4 +55,12 @@ export async function assignTeamMember(formData: FormData) {
   });
 
   revalidatePath(`/admin/clients/${projectId}`);
+}
+
+export async function deleteTeamMember(memberId: string) {
+  await requireCanDelete();
+  // Assignments to past/current projects cascade-delete via the schema —
+  // if you'd rather keep history, use toggleTeamMemberActive instead.
+  await prisma.teamMember.delete({ where: { id: memberId } });
+  revalidatePath("/admin/team");
 }

@@ -9,6 +9,7 @@ import { Input, Select } from "@/components/ui/FormField";
 import { MarkPaidButton } from "@/components/admin/MarkPaidButton";
 import { DeleteScheduleItemButton } from "@/components/admin/DeleteScheduleItemButton";
 import { CopyButton } from "@/components/admin/CopyButton";
+import { DeleteButton } from "@/components/admin/DeleteButton";
 import { formatINR, formatDate } from "@/lib/utils";
 import { assignTeamMember } from "@/lib/actions/team";
 import { createInstallment } from "@/lib/actions/payments";
@@ -54,6 +55,8 @@ export function ProjectTabs({
   ensureShareLinkAction,
   regenerateSharePinAction,
   updateOverviewAction,
+  deleteProjectAction,
+  canDelete,
 }: {
   project: ProjectTabsData;
   sendContractAction: (formData: FormData) => Promise<void>;
@@ -61,6 +64,8 @@ export function ProjectTabs({
   ensureShareLinkAction: () => Promise<void>;
   regenerateSharePinAction: () => Promise<void>;
   updateOverviewAction: (formData: FormData) => Promise<void>;
+  deleteProjectAction: () => Promise<void>;
+  canDelete: boolean;
 }) {
   const [tab, setTab] = useState<Tab>("Overview");
   const [editingOverview, setEditingOverview] = useState(false);
@@ -104,9 +109,17 @@ export function ProjectTabs({
           <Card>
             <div className="flex items-center justify-between">
               <CardLabel>Project Overview</CardLabel>
-              <Button variant="ghost" className="text-xs" onClick={() => setEditingOverview((v) => !v)}>
-                <Pencil className="h-3.5 w-3.5" /> {editingOverview ? "Cancel" : "Edit"}
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" className="text-xs" onClick={() => setEditingOverview((v) => !v)}>
+                  <Pencil className="h-3.5 w-3.5" /> {editingOverview ? "Cancel" : "Edit"}
+                </Button>
+                {canDelete && (
+                  <DeleteButton
+                    action={deleteProjectAction}
+                    confirmMessage={`Delete "${project.title}"? This removes its payments, schedule, deliverables, and everything else tied to it. This can't be undone.`}
+                  />
+                )}
+              </div>
             </div>
 
             {editingOverview ? (

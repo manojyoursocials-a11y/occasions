@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { EnquiryRow } from "@/components/admin/EnquiryRow";
+import { getSession } from "@/lib/get-session";
 import { Search } from "lucide-react";
 
 // Underlying enum stays new/contacted/quoted/won/lost (stable, low-risk),
@@ -25,6 +26,12 @@ export default async function LeadsPage({
   const statusFilter = params.status || "";
 
   const allLeads = await prisma.lead.findMany({ orderBy: { createdAt: "desc" } });
+
+  const session = await getSession();
+  const currentUser = session?.user
+    ? await prisma.user.findUnique({ where: { id: session.user.id } })
+    : null;
+  const canDelete = Boolean(currentUser?.canDelete || currentUser?.isOwner);
 
   const counts: Record<string, number> = {};
   for (const lead of allLeads) counts[lead.status] = (counts[lead.status] || 0) + 1;
@@ -126,6 +133,7 @@ export default async function LeadsPage({
             {leads.map((lead) => (
               <EnquiryRow
                 key={lead.id}
+                canDelete={canDelete}
                 lead={{
                   id: lead.id,
                   fullName: lead.fullName,

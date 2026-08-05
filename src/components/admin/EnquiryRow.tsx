@@ -3,7 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { LeadStatusSelect } from "@/components/admin/LeadStatusSelect";
-import { ChevronDown } from "lucide-react";
+import { DeleteButton } from "@/components/admin/DeleteButton";
+import { deleteLead } from "@/lib/actions/leads";
+import { ChevronDown, Pencil } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
 export interface EnquiryRowData {
@@ -21,7 +23,7 @@ export interface EnquiryRowData {
   createdAtISO: string;
 }
 
-export function EnquiryRow({ lead }: { lead: EnquiryRowData }) {
+export function EnquiryRow({ lead, canDelete }: { lead: EnquiryRowData; canDelete: boolean }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -84,6 +86,20 @@ export function EnquiryRow({ lead }: { lead: EnquiryRowData }) {
                 <p className="text-sm text-ink/80">{lead.notes}</p>
               </div>
             )}
+            <div className="mt-4 flex items-center gap-3 border-t border-black/5 pt-3">
+              <Link
+                href={`/admin/leads/${lead.id}/edit`}
+                className="focus-ring inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-ink/60 hover:bg-black/5"
+              >
+                <Pencil className="h-3.5 w-3.5" /> Edit
+              </Link>
+              {canDelete && (
+                <DeleteButton
+                  action={deleteLead.bind(null, lead.id)}
+                  confirmMessage={`Delete the enquiry from ${lead.fullName}? This can't be undone.`}
+                />
+              )}
+            </div>
           </td>
         </tr>
       )}
