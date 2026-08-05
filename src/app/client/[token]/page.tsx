@@ -5,7 +5,11 @@ import { verifyClientAccess } from "@/lib/actions/client-share";
 import { formatINR, formatDate, daysUntil } from "@/lib/utils";
 import { Lock, Clock, MapPin } from "lucide-react";
 
-type ProjectData = Awaited<ReturnType<typeof verifyClientAccess>> extends { project: infer P } ? P : never;
+// `Extract` distributes over the union properly (a bare conditional here
+// would not, since the checked type isn't a generic type parameter) —
+// this pulls out just the `{ ok: true; project: ... }` branch's project shape.
+type VerifyResult = Awaited<ReturnType<typeof verifyClientAccess>>;
+type ProjectData = Extract<VerifyResult, { ok: true }>["project"];
 
 export default function ClientShareGatePage({ params }: { params: { token: string } }) {
   const token = params.token;
