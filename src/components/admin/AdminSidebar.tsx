@@ -10,6 +10,7 @@ import {
   UsersRound,
   Wallet,
   Zap,
+  BarChart3,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,7 @@ const NAV = [
   { href: "/admin/leads", label: "Enquiries", icon: Search },
   { href: "/admin/clients", label: "Projects", icon: FolderOpen },
   { href: "/admin/post-production", label: "Post Production", icon: Film },
+  { href: "/admin/data", label: "Data", icon: BarChart3 },
   { href: "/admin/team", label: "Team", icon: UsersRound },
   { href: "/admin/payments", label: "Finances", icon: Wallet },
   { href: "/admin/automation", label: "Automation", icon: Zap },

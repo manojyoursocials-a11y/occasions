@@ -26,16 +26,11 @@ const config: Config = {
       },
       boxShadow: {
         card: "0 1px 2px rgba(20,18,31,0.04), 0 8px 24px -12px rgba(20,18,31,0.10)",
+        "card-hover": "0 2px 4px rgba(20,18,31,0.06), 0 12px 28px -12px rgba(20,18,31,0.16)",
       },
       fontFamily: {
-        sans: [
-          "Inter",
-          "-apple-system",
-          "BlinkMacSystemFont",
-          "Segoe UI",
-          "system-ui",
-          "sans-serif",
-        ],
+        sans: ["var(--font-inter)", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "system-ui", "sans-serif"],
+        heading: ["var(--font-heading)", "var(--font-inter)", "system-ui", "sans-serif"],
       },
     },
   },

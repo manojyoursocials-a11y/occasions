@@ -13,6 +13,7 @@
     "postinstall": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
+    "db:add-team": "tsx prisma/add-team.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {

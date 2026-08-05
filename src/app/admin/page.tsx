@@ -4,6 +4,7 @@ import { StatCard } from "@/components/ui/StatCard";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { formatINR, formatDate } from "@/lib/utils";
+import { Search, FolderOpen, Wallet, TrendingUp } from "lucide-react";
 
 const STATUS_LABELS: Record<string, string> = {
   new: "New",
@@ -45,10 +46,10 @@ export default async function AdminDashboard() {
       <p className="mt-1 text-sm text-ink/50">Everything across your enquiries and projects, at a glance</p>
 
       <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="New Enquiries" value={leadCount} sub="awaiting response" />
-        <StatCard label="Active Projects" value={projectCount} sub="booked events" />
-        <StatCard label="Collected" value={formatINR(totalCollected)} sub={`of ${formatINR(totalQuoted)} quoted`} />
-        <StatCard label="Outstanding" value={formatINR(totalOutstanding)} sub="still to collect" />
+        <StatCard label="New Enquiries" value={leadCount} sub="awaiting response" icon={Search} tone="brand" />
+        <StatCard label="Active Projects" value={projectCount} sub="booked events" icon={FolderOpen} tone="blue" />
+        <StatCard label="Collected" value={formatINR(totalCollected)} sub={`of ${formatINR(totalQuoted)} quoted`} icon={Wallet} tone="green" />
+        <StatCard label="Outstanding" value={formatINR(totalOutstanding)} sub="still to collect" icon={TrendingUp} tone="amber" />
       </div>
 
       {/* Enquiry funnel */}

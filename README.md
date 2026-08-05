@@ -1,130 +1,117 @@
-# Aperture Weddings — Studio Portal
+# The Occasions Event Planners — Studio Portal
 
-A Next.js 14 (App Router) skeleton for an event-planning studio SaaS: an
-**admin CRM** for the studio team and a **branded client portal** for
-couples.
+A Next.js 14 (App Router) studio SaaS: an **admin CRM** for the team and a
+**branded client portal** for couples — plus a public enquiry landing page
+and PIN-protected client share links.
 
-**Supabase is used purely as a hosted Postgres database.** Auth, sessions,
-and role-based access are handled entirely inside the app with NextAuth
-(credentials + bcrypt + JWT) and Prisma — no Supabase Auth, no Supabase
-client libraries.
+**Database:** Prisma Postgres (or any Postgres — Neon, Supabase, Railway,
+etc. all work unchanged since it's a standard `postgresql://` connection
+string via Prisma).
+
+**Auth:** NextAuth, credentials + bcrypt + JWT. No third-party auth
+provider — sessions and role-based access (`admin` | `client`) are handled
+entirely inside the app.
 
 ## What's included
 
-**Auth & access control**
-- NextAuth credentials provider: email + password, hashed with bcrypt,
-  checked against a `users` table via Prisma
-- JWT sessions, with `role` (`admin` | `client`) baked into the token
-- `middleware.ts` reads the JWT at the edge (`next-auth/jwt`) and keeps
-  clients out of `/admin`, admins out of `/portal`, and everyone out of
-  both while signed out
-- No RLS needed — the app is the only thing that talks to the database,
-  so authorization lives in the middleware + page queries
-
-**Admin workspace** (`/admin`)
-- Dashboard — leads, active projects, quoted vs. collected totals
-- Leads — enquiry pipeline
-- Clients & Projects — every booked couple
-- Team — crew roster
-- Payments — every installment across every project
-- Post-Production — deliverable tracking by editor/status
-- Automation — follow-up rules + activity log
-
-**Client portal** (`/portal`) — mirrors the reference screenshot
-- Dashboard — contract alert, total quote + amount paid, event countdown,
-  next payment due, contract status, gallery progress
-- Quote & Payments, Contract, Event Schedule, Moodboard, Team,
-  Deliverables, Documents, WhatsApp Group
-- Sidebar locks Team / Deliverables / WhatsApp until the contract is signed
+- **Admin workspace** (`/admin`) — Dashboard, Enquiries, Projects, Post
+  Production, Data (analytics), Team, Finances, Automation
+- **Client portal** (`/portal`) — account-based login for each client,
+  showing their project's quote, payments, contract, schedule, moodboard,
+  deliverables, documents
+- **Public enquiry landing page** (`/enquire`) — customizable from
+  Enquiries → Landing Page in the admin
+- **PIN-protected client share links** (`/client/[token]`) — a link +
+  4-digit PIN you can hand a client with no account needed, generated from
+  a project's Contract tab
+- Every module is backed by real create/update actions (Prisma), not
+  static mockups
 
 ## Setup
 
-1. **Create a Supabase project** at supabase.com — you only need it for the
-   Postgres database, so the free tier is plenty to start.
-2. **Get your connection string**: Project Settings → Database →
-   Connection string → URI. Use the pooled ("Transaction") string if you'll
-   deploy to a serverless/edge platform; the direct string is simplest for
-   local development.
-3. **Copy environment variables**:
+1. **Set up a Postgres database.** Any provider works — Prisma Postgres,
+   Neon, Supabase, Railway. Get its connection string.
+2. **Copy environment variables**:
    ```bash
-   cp .env.example .env.local
+   cp .env.example .env
    ```
-   Fill in `DATABASE_URL` with the string from step 2, and generate
-   `NEXTAUTH_SECRET`:
+   Fill in `DATABASE_URL`, and generate `NEXTAUTH_SECRET`:
    ```bash
-   openssl rand -base64 32
+   node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
    ```
-4. **Install & set up the database**:
+   `NEXTAUTH_URL` should be `http://localhost:3000` for local dev, and your
+   real deployed URL in production.
+
+   Note: Prisma's CLI (`db push`, `db seed`) only reads `.env`, not
+   `.env.local` — keep your real values in `.env`.
+
+3. **Install & set up the database**:
    ```bash
    npm install
-   npm run db:push     # creates every table from prisma/schema.prisma
-   npm run db:seed     # creates a demo admin + client + project
+   npm run db:push       # creates every table from prisma/schema.prisma
+   npm run db:seed       # demo admin + client + project, plus the 4 studio team logins below
    ```
+4. **`db:add-team` is also available** if you ever need to add or update
+   team logins later without re-running the full seed:
+   ```bash
+   npm run db:add-team
+   ```
+   Edit the list in `prisma/add-team.ts` first. Everyone created this way
+   gets full admin access — there isn't a restricted-permissions role yet,
+   so treat each account as a trusted studio team member.
 5. **Run it**:
    ```bash
    npm run dev
    ```
-   Seeded logins:
-   - Admin: `admin@aperture.studio` / `admin1234`
+   If you ran `db:seed`, demo logins are:
+   - Admin: `admin@theoccasions.studio` / `admin1234`
    - Client: `ananya@example.com` / `client1234`
 
-   Change these immediately if this ever leaves your machine — the seed
-   script is for local development only.
-6. **Add real users**: for now, create them directly via Prisma Studio
-   (`npm run db:studio`) or a small script, hashing the password with
-   `bcryptjs` the same way `prisma/seed.ts` does. A proper admin-facing
-   "invite a client" flow is a natural next feature to build.
+   Change or remove these before this ever goes anywhere real — they're
+   for local development only.
 
-## Pushing to GitHub
+## Deploying
 
-This project is already a git repo with an initial commit. To publish it:
-
-```bash
-# create an empty repo on GitHub first (github.com/new), then:
-git remote add origin https://github.com/<your-username>/<repo-name>.git
-git branch -M main
-git push -u origin main
-```
-
-`.env.local` is already git-ignored, so your database URL and secrets
-won't be committed.
+Works on Vercel with zero config beyond environment variables — set
+`DATABASE_URL`, `NEXTAUTH_SECRET`, and `NEXTAUTH_URL` (your production URL)
+in the project's Environment Variables, then deploy. `postinstall` already
+runs `prisma generate` automatically.
 
 ## Where to go next
 
-- Add a public lead-capture form that inserts into `leads` — the "Leads"
-  pillar from the brief.
-- Wire e-signature for `/portal/contract` and flip `Project.contractStatus`
-  on completion.
-- Add file uploads for moodboard/documents/deliverables (Supabase Storage,
-  S3, or UploadThing all work fine alongside a Prisma-only setup).
-- Connect the Automation module to a real scheduler (a cron job or queue
-  calling WhatsApp/email APIs) instead of the static rule cards shown now.
-- Swap the `brand` color palette in `tailwind.config.ts` for your real
-  brand once you have it.
+- Add per-person permission levels (right now every team account is a
+  full admin) if you need to restrict what certain team members can see
+  or do.
+- Wire e-signature for `/portal/contract` and flip the project's contract
+  status on completion.
+- Add file uploads for moodboard/documents/deliverables (any storage
+  provider works alongside Prisma).
+- Connect the Automation module to a real scheduler for actual
+  WhatsApp/email sends, instead of the manual "Send Now" log it has today.
 
 ## Structure
 
 ```
 prisma/
-  schema.prisma         all tables, enums, relations
-  seed.ts                demo admin + client + project
+  schema.prisma          all tables, enums, relations
+  seed.ts                 demo admin + client + project
+  add-team.ts              real studio team accounts
 src/
   app/
     api/auth/[...nextauth]/route.ts   NextAuth handler
-    api/me/route.ts                    role lookup used right after login
-    login/                              client-side sign-in form
-    admin/                              studio-facing CRM
-    portal/                             client-facing portal
-    providers.tsx                       SessionProvider wrapper
+    login/                             client-side sign-in form
+    admin/                             studio-facing CRM
+    portal/                            client-facing portal
+    enquire/                           public enquiry landing page
+    client/[token]/                    PIN-protected public project view
   components/
-    ui/                  Card, Badge, Button, StatCard
-    admin/                AdminSidebar
-    portal/               PortalSidebar
+    ui/                   Card, Badge, Button, StatCard, FormField
+    admin/                 AdminSidebar, ProjectTabs, and other admin widgets
+    portal/                PortalSidebar
   lib/
-    prisma.ts            Prisma client singleton
-    auth.ts               NextAuth config (credentials + bcrypt + JWT)
-    get-session.ts        getServerSession() wrapper for Server Components
-    utils.ts
-  middleware.ts           edge-side role gating via next-auth/jwt
-  types/next-auth.d.ts    typed session.user.id / role
+    prisma.ts             Prisma client singleton
+    auth.ts                 NextAuth config (credentials + bcrypt + JWT)
+    get-session.ts          getServerSession() wrapper for Server Components
+    actions/                 server actions, one file per domain
+  middleware.ts            edge-side role gating via next-auth/jwt
 ```

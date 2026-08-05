@@ -72,9 +72,36 @@ async function main() {
     },
   });
 
+  // Studio team logins — full admin access to the CRM.
+  const teamAccounts = [
+    { email: "koushic@occasions.in", password: "Koushic@123", name: "Koushic" },
+    { email: "lingesh@occasions.in", password: "Lingesh@123", name: "Lingesh" },
+    { email: "sathya@occasions.in", password: "Sathya@123", name: "Sathya" },
+    { email: "saran@occasions.in", password: "Saran@123", name: "Saran" },
+  ];
+
+  for (const acct of teamAccounts) {
+    const passwordHash = await bcrypt.hash(acct.password, 10);
+    await prisma.user.upsert({
+      where: { email: acct.email },
+      update: {},
+      create: {
+        email: acct.email,
+        passwordHash,
+        fullName: acct.name,
+        role: "admin",
+        companyName: "The Occasions Event Planners",
+      },
+    });
+  }
+
   console.log("Seed complete.");
   console.log("Admin login: admin@theoccasions.studio / admin1234");
   console.log("Client login: ananya@example.com / client1234");
+  console.log("Team logins:");
+  for (const acct of teamAccounts) {
+    console.log(`  ${acct.email} / ${acct.password}`);
+  }
 }
 
 main()
